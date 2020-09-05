@@ -1,0 +1,42 @@
+{
+    "name": "toriqahmads/sms-viro",
+    "description": "A package for use SMS Viro in ease",
+    "keywords": [
+        "toriqahmads",
+        "sms-viro"
+    ],
+    "homepage": "https://github.com/toriqahmads/sms-viro",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Toriq Ahmad",
+            "email": "toriq@edu.unisbank.ac.id",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Toriqahmads\\SmsViro\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Toriqahmads\\SmsViro\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
