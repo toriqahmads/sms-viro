@@ -66,10 +66,20 @@ class SmsViro
         ]);
     }
 
-    public function sendSms(array $to, string $text)
+    private function setTo(String $to): Array
+    {
+        if (substr($to, 0, 2) === "62" || substr($to, 0, 3) === "+62")
+        {
+            return [$to];
+        }
+
+        return new SmsViroException("Number must be start with 62 or +62");
+    }
+
+    public function sendSms($to, string $text)
     {
         $httpRequest = $this->buildHttpClient();
-        $requestBody = $this->buildRequestBody($to, $text);
+        $requestBody = $this->buildRequestBody($this->setTo($to), $text);
 
         $httpRequest->request("POST", $this->endpoint, ["body" => $requestBody]);
 
