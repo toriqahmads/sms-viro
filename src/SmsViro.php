@@ -1,42 +1,69 @@
 <?php
 namespace Toriqahmads\SmsViro;
-require ("../vendor/autoload.php");
+require (__DIR__."/../vendor/autoload.php");
 use GuzzleHttp\Client;
 use Toriqahmads\SmsViro\Exceptions\SmsViroException;
 
 class SmsViro
 {
-    private String $apikey;
-    private String $from;
-    private String $baseuri = "https://api.smsviro.com/restapi/sms";
-    private String $endpoint = "/1/text/advanced";
+    private string $apikey;
+    private string $from;
+    private string $baseuri = "https://api.smsviro.com/restapi/sms";
+    private string $endpoint = "/1/text/advanced";
 
-    public function __construct(String $apikey, String $from)
+    public function __construct(string $apikey, string $from)
     {
         $this->apikey = $apikey;
         $this->from = $from;
     }
 
-    public function getApiKey(): String
+    /**
+     * getter for property apikey
+     *
+     * @return string
+     */
+    public function getApiKey(): string
     {
         return $this->apikey;
     }
 
-    public function getFrom(): String
+    /**
+     * getter for property from
+     *
+     * @return string
+     */
+    public function getFrom(): string
     {
         return $this->from;
     }
 
-    public function setApiKey(String $apikey): void
+    /**
+     * setter for property apikey
+     *
+     * @param string $apikey
+     * @return void
+     */
+    public function setApiKey(string $apikey): void
     {
         $this->apikey = $apikey;
     }
 
-    public function setFrom(String $from): void
+    /**
+     * setter for property from
+     *
+     * @param string $from
+     * @return void
+     */
+    public function setFrom(string $from): void
     {
         $this->from = $from;
     }
 
+    /**
+     * Build http client instance
+     *
+     * @return Client
+     */
     private function buildHttpClient(): Client
     {
         $client = new Client([
@@ -53,6 +80,13 @@ class SmsViro
         return $client;
     }
 
+    /**
+     * Build http request body
+     *
+     * @param array $to
+     * @param string $text
+     * @return object
+     */
     private function buildRequestBody(array $to, string $text): object
     {
         return json_decode([
@@ -66,16 +100,64 @@ class SmsViro
         ]);
     }
 
-    private function setTo(String $to): Array
+    /**
+     * Format $to to standard formatting
+     *
+     * @param string $to
+     * @return string
+     */
+    private function formatting(string $to): string
     {
-        if (substr($to, 0, 2) === "62" || substr($to, 0, 3) === "+62")
+        if (!preg_match("/(^(62)|^(\+62))\d{9,11}/", $to) || !preg_match("/^(0)\d{9,12}/", $to))
         {
-            return [$to];
+            throw new SmsViroException("Number must be start with 62 or +62 or 0");
         }
 
-        return new SmsViroException("Number must be start with 62 or +62");
+        if (preg_match("/^(0)\d{9,12}/", $to))
+        {
+            $to = preg_replace("/^(0)/", "62", $to);
+        }
+
+        return $to;
     }
 
+    /**
+     * Set to
+     *
+     * @param string|array $to
+     * @return array
+     */
+    private function setTo($to): array
+    {
+        if (!is_array($to) || !is_string($to)) throw new SmsViroException("Parameter $to must be string or array");
+
+        $destination = array();
+
+        if (is_array($to))
+        {
+            if (empty($to)) throw new SmsViroException("Parameter $to is empty");
+            foreach ($to as $value)
+            {
+                array_push($destination, $this->formatting($value));
+            }
+        }
+
+        if (is_string($to))
+        {
+            if (empty($to)) throw new SmsViroException("Parameter $to is empty");
+            array_push($destination, $this->formatting($to));
+        }
+
+        return $destination;
+    }
+
+    /**
+     * Send single or broadcast SMS
+     *
+     * @param string|array $to
+     * @param string $text
+     * @return void
+     */
     public function sendSms($to, string $text)
     {
         $httpRequest = $this->buildHttpClient();
@@ -83,10 +165,10 @@ class SmsViro
 
         $httpRequest->request("POST", $this->endpoint, ["body" => $requestBody]);
 
-        if ($httpRequest->getStatusCode() === 200) {
-            return true;
+        if ($httpRequest->getStatusCode() !== 200) {
+            throw new SmsViroException("Error while sending sms");
         }
 
-        return new SmsViroException("Error while sending sms");
+        return true;
     }
 }
