@@ -165,10 +165,6 @@ class SmsViro
         $response = $httpRequest->request("POST", $this->endpoint, ["body" => json_encode($requestBody)]);
         $this->setResponse($response);
 
-        if ($this->getStatusCode() !== 200) {
-            throw new SmsViroException("Error while sending sms");
-        }
-
         return $this;
     }
 
