@@ -1,6 +1,5 @@
 <?php
 namespace Toriqahmads\SmsViro;
-require (__DIR__."/../vendor/autoload.php");
 use GuzzleHttp\Client;
 use Toriqahmads\SmsViro\Exceptions\SmsViroException;
 
@@ -8,8 +7,13 @@ class SmsViro
 {
     private string $apikey;
     private string $from;
-    private string $baseuri = "https://api.smsviro.com/restapi/sms";
-    private string $endpoint = "/1/text/advanced";
+    private string $baseuri = "https://api.smsviro.com/";
+    private string $endpoint = "restapi/sms/1/text/single";
+    private $response;
+    private $stream;
+    private $body;
+    private $statusCode;
+    private $phrase;
 
     public function __construct(string $apikey, string $from)
     {
@@ -85,19 +89,15 @@ class SmsViro
      *
      * @param array $to
      * @param string $text
-     * @return object
+     * @return array
      */
-    private function buildRequestBody(array $to, string $text): object
+    private function buildRequestBody(array $to, string $text): array
     {
-        return json_decode([
-            "message" => [
-                "from" => $this->from,
-                "destination" => [
-                    "to" => $to
-                ],
-                "text" => $text
-            ]
-        ]);
+        return [
+            "from" => $this->from,
+            "to" => $to,
+            "text" => $text
+        ];
     }
 
     /**
@@ -108,7 +108,7 @@ class SmsViro
      */
     private function formatting(string $to): string
     {
-        if (!preg_match("/(^(62)|^(\+62))\d{9,11}/", $to) || !preg_match("/^(0)\d{9,12}/", $to))
+        if (!preg_match("/(^(62)|^(\+62))\d{9,11}/", $to) && !preg_match("/^(0)\d{9,12}/", $to))
         {
             throw new SmsViroException("Number must be start with 62 or +62 or 0");
         }
@@ -129,7 +129,7 @@ class SmsViro
      */
     private function setTo($to): array
     {
-        if (!is_array($to) || !is_string($to)) throw new SmsViroException("Parameter $to must be string or array");
+        if (!is_array($to) && !is_string($to)) throw new SmsViroException("Parameter $to must be string or array");
 
         $destination = array();
 
@@ -156,19 +156,58 @@ class SmsViro
      *
      * @param string|array $to
      * @param string $text
-     * @return void
+     * @return $this
      */
     public function sendSms($to, string $text)
     {
         $httpRequest = $this->buildHttpClient();
         $requestBody = $this->buildRequestBody($this->setTo($to), $text);
+        $response = $httpRequest->request("POST", $this->endpoint, ["body" => json_encode($requestBody)]);
+        $this->setResponse($response);
 
-        $httpRequest->request("POST", $this->endpoint, ["body" => $requestBody]);
-
-        if ($httpRequest->getStatusCode() !== 200) {
+        if ($this->getStatusCode() !== 200) {
             throw new SmsViroException("Error while sending sms");
         }
 
-        return true;
+        return $this;
+    }
+
+    private function setResponse($response): void
+    {
+        $this->response = $response;
+        $this->stream = $this->response->getBody();
+        $this->body = $this->stream->getContents();
+        $this->statusCode = $this->response->getStatusCode();
+        $this->phrase = $this->response->getReasonPhrase();
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    public function getStream()
+    {
+        return $this->stream;
+    }
+
+    public function getContents()
+    {
+        return $this->body;
+    }
+
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
+
+    public function getPhrase()
+    {
+        return $this->phrase;
+    }
+
+    public function isRequestSuccess()
+    {
+        return $this->getStatusCode() != 200 ? false : true;
     }
 }
