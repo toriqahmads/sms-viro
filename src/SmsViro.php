@@ -70,7 +70,7 @@ class SmsViro
      */
     private function buildHttpClient(): Client
     {
-        $client = new Client([
+        return new Client([
             "base_uri" => $this->baseuri,
             "timeout" => 30,
             "allow_redirects" => true,
@@ -80,8 +80,6 @@ class SmsViro
                 "Authorization" => "App {$this->apikey}"
             ]
         ]);
-
-        return $client;
     }
 
     /**
@@ -204,6 +202,6 @@ class SmsViro
 
     public function isRequestSuccess()
     {
-        return $this->getStatusCode() != 200 ? false : true;
+        return $this->getStatusCode() === 200;
     }
 }
