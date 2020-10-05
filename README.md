@@ -16,9 +16,18 @@ composer require toriqahmads/sms-viro
 ```
 
 ## Usage
-
+### Direct in controller
+import package in the top of classname
 ``` php
-// Usage description here
+use Toriqahmads\SmsViro\SmsViro;
+```
+in method/function, pass apikey and sender name on instance class. call `sendSms` to send your message
+``` php
+...
+$smsviro = new SmsViro('707474e01fead92a7c9421a4069f21cd-12969e36-b3ef-46d8-8e93-f78804cee22d', 'YourAwesomeApp');
+$smsviro->sendSms('089668639048', 'Your otp code is 6989');
+$smsviro->isRequestSuccess();
+...
 ```
 
 ### Testing
