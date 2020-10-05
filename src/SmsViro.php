@@ -130,12 +130,11 @@ class SmsViro
     private function setTo($to): array
     {
         if (!is_array($to) && !is_string($to)) throw new SmsViroException("Parameter $to must be string or array");
-
+        if (empty($to)) throw new SmsViroException("Parameter $to is empty");
         $destination = array();
 
         if (is_array($to))
         {
-            if (empty($to)) throw new SmsViroException("Parameter $to is empty");
             foreach ($to as $value)
             {
                 array_push($destination, $this->formatting($value));
@@ -144,7 +143,6 @@ class SmsViro
 
         if (is_string($to))
         {
-            if (empty($to)) throw new SmsViroException("Parameter $to is empty");
             array_push($destination, $this->formatting($to));
         }
 
