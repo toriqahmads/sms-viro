@@ -9,11 +9,11 @@ class SmsViro
     private string $from;
     private string $baseuri = "https://api.smsviro.com/";
     private string $endpoint = "restapi/sms/1/text/single";
-    private $response;
-    private $stream;
-    private $body;
-    private $statusCode;
-    private $phrase;
+    public $response;
+    public $stream;
+    public $body;
+    public $statusCode;
+    public $phrase;
 
     public function __construct(string $apikey, string $from)
     {
