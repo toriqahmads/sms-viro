@@ -1,11 +1,9 @@
-# Very short description of the package
+# SMS Viro Package for PHP Application
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/toriqahmads/sms-viro.svg?style=flat-square)](https://packagist.org/packages/toriqahmads/sms-viro)
 [![Build Status](https://img.shields.io/travis/toriqahmads/sms-viro/master.svg?style=flat-square)](https://travis-ci.org/toriqahmads/sms-viro)
 [![Quality Score](https://img.shields.io/scrutinizer/g/toriqahmads/sms-viro.svg?style=flat-square)](https://scrutinizer-ci.com/g/toriqahmads/sms-viro)
 [![Total Downloads](https://img.shields.io/packagist/dt/toriqahmads/sms-viro.svg?style=flat-square)](https://packagist.org/packages/toriqahmads/sms-viro)
-
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
 
 ## Installation
 
@@ -16,12 +14,23 @@ composer require toriqahmads/sms-viro
 ```
 
 ## Usage
-### Direct in controller
-import package in the top of classname
+Create an instance of class, pass apikey and sender name
+```php
+use Toriqahmads\SmsViro\SmsViro;
+
+$smsviro = new SmsViro('707474e01fead92a7c9421a4069f21cd-12969e36-b3ef-46d8-8e93-f78804cee22d', 'YourAwesomeApp');
+$smsviro->sendSms('089668639048', 'Your otp code is 6989');
+var_dump($smsviro->isRequestSuccess());
+```
+
+## Framework Integrations
+### Laravel
+#### 1. Direct in controller
+Import package in the top of classname
 ``` php
 use Toriqahmads\SmsViro\SmsViro;
 ```
-in method/function, pass apikey and sender name on instance class. call `sendSms` to send your message
+In method/function, pass apikey and sender name on instance class. call `sendSms` to send your message
 ``` php
 ...
 $smsviro = new SmsViro('707474e01fead92a7c9421a4069f21cd-12969e36-b3ef-46d8-8e93-f78804cee22d', 'YourAwesomeApp');
@@ -29,6 +38,39 @@ $smsviro->sendSms('089668639048', 'Your otp code is 6989');
 $smsviro->isRequestSuccess();
 ...
 ```
+#### 2. Dependency Injection
+Bind class on register method
+```php
+...
+use Toriqahmads\SmsViro\SmsViro;
+
+class OptimusServiceProvider extends ServiceProvider
+{
+    public function register()
+    {
+        ...
+        $this->app->singleton(SmsViro::class, function ($app) {
+            return new SmsViro('707474e01fead92a7c9421a4069f21cd-12969e36-b3ef-46d8-8e93-f78804cee22d', 'YourAwesomeApp');
+        });
+    }
+...
+```
+Example controller
+```php
+...
+use Toriqahmads\SmsViro\SmsViro;
+
+class TestController extends Controller
+{
+    public function sendSms(SmsViro $smsviro)
+    {
+        $smsviro->sendSms('089668639048', 'Your otp code is 6989');
+        $smsviro->isRequestSuccess();
+    }
+}
+...
+```
+
 
 ### Testing
 
