@@ -22,6 +22,8 @@ class SmsViroTest extends TestCase
     {
         $smsviro = $this->getInstance();
 
+        $smsviro->sendSms("089668639088", "Hallo from smsviro");
 
+        return $this->assertTrue($smsviro->isRequestSuccess());
     }
 }
